@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "soulfire",
+  "version": "${version}",
+  "name": "SOULFIRE",
+  "description": "Dark fantasy movement, combat, bonfires and Spark progression.",
+  "authors": ["SOULFIRE Team"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["dev.soulfire.SoulfireMod"]
+  },
+  "mixins": ["soulfire.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.16.10",
+    "minecraft": "~1.21.4",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
