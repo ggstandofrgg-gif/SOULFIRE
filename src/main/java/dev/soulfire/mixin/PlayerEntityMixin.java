@@ -23,6 +23,6 @@ public abstract class PlayerEntityMixin implements SoulfireDataAccess {
 
     @Inject(method="readCustomDataFromNbt",at=@At("TAIL"))
     private void soulfire$read(NbtCompound n, CallbackInfo ci){
-        if(n.contains("SoulfireData")) soulfire$data.readNbt(n.getCompound("SoulfireData").orElseGet(NbtCompound::new));
+        if(n.contains("SoulfireData")) soulfire$data.readNbt(n.getCompound("SoulfireData"));
     }
 }
