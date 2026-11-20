@@ -5,6 +5,8 @@ import dev.soulfire.command.SoulfireCommands;
 import dev.soulfire.data.SoulfirePlayerData;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -39,6 +41,15 @@ public class SoulfireMod implements ModInitializer {
         SoulfirePlayerData.register();
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
                 SoulfireCommands.register(dispatcher));
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                SoulfirePlayerData data = SoulfirePlayerData.get(player);
+                data.tickStamina(player.isSprinting(), player.isOnGround());
+                if (data.getStamina() <= 0.0f && player.isSprinting()) {
+                    player.setSprinting(false);
+                }
+            }
+        });
         LOGGER.info("SOULFIRE loaded.");
     }
 }

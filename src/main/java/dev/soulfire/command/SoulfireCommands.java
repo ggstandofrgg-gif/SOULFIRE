@@ -14,6 +14,7 @@ public final class SoulfireCommands {
         d.register(literal("soulfire")
             .then(literal("help").executes(c->help(c.getSource())))
             .then(literal("stats").executes(c->stats(c.getSource())))
+            .then(literal("stamina").executes(c->stamina(c.getSource())))
             .then(literal("levelup").executes(c->level(c.getSource())))
             .then(literal("upgrade").then(literal("vigor").executes(c->upgrade(c.getSource(),"vigor")))
                 .then(literal("endurance").executes(c->upgrade(c.getSource(),"endurance")))
@@ -40,9 +41,14 @@ public final class SoulfireCommands {
     private static int help(ServerCommandSource s){
         s.sendFeedback(()->Text.literal("§6SOULFIRE §8| §f/soulfire stats, levelup, upgrade <stat>, combat, roll, dash, wallgrab, rope, spark <pulse|cleanse|crystal>, warp, recover"),false);return 1;
     }
+    private static int stamina(ServerCommandSource s)throws com.mojang.brigadier.exceptions.CommandSyntaxException{
+        var x=SoulfirePlayerData.get(s.getPlayerOrThrow());
+        s.sendFeedback(()->Text.literal(String.format(java.util.Locale.ROOT, "§bВыносливость: %.0f/%.0f", x.getStamina(), x.maxStamina())), false);
+        return 1;
+    }
     private static int stats(ServerCommandSource s)throws com.mojang.brigadier.exceptions.CommandSyntaxException{
         var p=s.getPlayerOrThrow();var x=SoulfirePlayerData.get(p);
-        s.sendFeedback(()->Text.literal("§6SOULFIRE §8— §7Уровень §e"+x.getLevel()+" §7| Души §e"+x.getSouls()+" §7| Очки §e"+x.getPoints()+" §7| Искра §b"+x.getSpark()+"/"+x.getMaxSpark()),false);
+        s.sendFeedback(()->Text.literal("§6SOULFIRE §8— §7Уровень §e"+x.getLevel()+" §7| Души §e"+x.getSouls()+" §7| Очки §e"+x.getPoints()+" §7| Искра §b"+x.getSpark()+"/"+x.getMaxSpark()+" §7| Выносливость §b"+(int)x.getStamina()+"/"+(int)x.maxStamina()),false);
         for(String k:new String[]{"vigor","endurance","strength","dexterity","intelligence","faith","vitality"})s.sendFeedback(()->Text.literal("§7"+k+": §e"+x.stat(k)),false);return 1;
     }
     private static int level(ServerCommandSource s)throws com.mojang.brigadier.exceptions.CommandSyntaxException{

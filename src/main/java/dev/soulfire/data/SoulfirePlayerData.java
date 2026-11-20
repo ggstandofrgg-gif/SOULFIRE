@@ -10,6 +10,7 @@ public final class SoulfirePlayerData {
     private int unspentPoints;
     private int vigor, endurance, strength, dexterity, intelligence, faith, vitality;
     private int spark = 100;
+    private float stamina = 100.0f;
     private int maxSpark = 100;
     private int lostSouls;
     private BlockPos lastBonfire;
@@ -31,6 +32,7 @@ public final class SoulfirePlayerData {
         strength=n.getInt("Strength"); dexterity=n.getInt("Dexterity");
         intelligence=n.getInt("Intelligence"); faith=n.getInt("Faith");
         vitality=n.getInt("Vitality"); spark=(n.contains("Spark") ? n.getInt("Spark") : 100);
+        stamina = n.contains("Stamina") ? Math.max(0.0f, Math.min(maxStamina(), n.getFloat("Stamina"))) : maxStamina();
         maxSpark=Math.max(100,(n.contains("MaxSpark") ? n.getInt("MaxSpark") : 100));
         lostSouls=n.getInt("LostSouls");
         combatMode=n.getBoolean("CombatMode");
@@ -45,6 +47,7 @@ public final class SoulfirePlayerData {
         n.putInt("Vigor",vigor); n.putInt("Endurance",endurance); n.putInt("Strength",strength);
         n.putInt("Dexterity",dexterity); n.putInt("Intelligence",intelligence); n.putInt("Faith",faith);
         n.putInt("Vitality",vitality); n.putInt("Spark",spark); n.putInt("MaxSpark",maxSpark);
+        n.putFloat("Stamina", stamina);
         n.putInt("LostSouls",lostSouls); n.putBoolean("CombatMode",combatMode);
         n.putBoolean("WallGrab",wallGrab); n.putBoolean("RopeMode",ropeMode);
         if(lastBonfire!=null){n.putInt("BonfireX",lastBonfire.getX());n.putInt("BonfireY",lastBonfire.getY());n.putInt("BonfireZ",lastBonfire.getZ());}
@@ -58,7 +61,7 @@ public final class SoulfirePlayerData {
     public boolean spendPoint(String stat){
         if(unspentPoints<=0)return false;
         switch(stat){
-            case "vigor" -> vigor++; case "endurance" -> endurance++;
+            case "vigor" -> vigor++; case "endurance" -> { endurance++; stamina = Math.min(maxStamina(), stamina + 10.0f); }
             case "strength" -> strength++; case "dexterity" -> dexterity++;
             case "intelligence" -> intelligence++; case "faith" -> faith++;
             case "vitality" -> vitality++; default -> {return false;}
@@ -67,6 +70,18 @@ public final class SoulfirePlayerData {
     }
     public int stat(String s){return switch(s){case "vigor"->vigor;case "endurance"->endurance;case "strength"->strength;case "dexterity"->dexterity;case "intelligence"->intelligence;case "faith"->faith;case "vitality"->vitality;default->0;};}
     public int getSpark(){return spark;} public int getMaxSpark(){return maxSpark;}
+    public float getStamina(){return stamina;}
+    public float maxStamina(){return 100.0f + endurance * 10.0f;}
+    public void tickStamina(boolean sprinting, boolean grounded){
+        if (sprinting) stamina = Math.max(0.0f, stamina - 0.45f);
+        else if (grounded) stamina = Math.min(maxStamina(), stamina + 0.65f);
+        else stamina = Math.min(maxStamina(), stamina + 0.15f);
+    }
+    public boolean spendStamina(float amount){
+        if (amount < 0 || stamina < amount) return false;
+        stamina -= amount;
+        return true;
+    }
     public boolean spendSpark(int n){if(spark<n)return false;spark-=n;return true;}
     public void restoreSpark(){spark=maxSpark;}
     public void addSparkCapacity(int n){maxSpark+=n;spark=maxSpark;}
